@@ -1,0 +1,70 @@
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+    networks:
+      - silitech
+
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - mysql
+      - redis
+      - rabbitmq
+    networks:
+      - silitech
+
+  mysql:
+    image: mysql:latest
+    ports:
+      - "8306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: silitech
+      MYSQL_USER: silitech
+      MYSQL_PASSWORD: silitech
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - silitech
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - silitech
+
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: silitech
+      RABBITMQ_DEFAULT_PASS: silitech
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - silitech
+
+volumes:
+  mysql_data:
+  redis_data:
+  rabbitmq_data:
+
+networks:
+  silitech:
+    driver: bridge
