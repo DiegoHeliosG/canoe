@@ -58,6 +58,7 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import api from '../api';
+import { parseCollection } from '../jsonapi';
 
 const managers = ref([]);
 const editing = ref(null);
@@ -67,7 +68,7 @@ const form = reactive({ name: '' });
 
 async function fetchManagers() {
     const { data } = await api.get('/fund-managers');
-    managers.value = data.data;
+    managers.value = parseCollection(data).items;
 }
 
 function editManager(manager) {

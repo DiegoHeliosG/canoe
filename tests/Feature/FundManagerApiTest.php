@@ -25,7 +25,8 @@ class FundManagerApiTest extends TestCase
         $response = $this->postJson('/api/fund-managers', ['name' => 'BlackRock']);
 
         $response->assertCreated()
-            ->assertJsonPath('data.name', 'BlackRock');
+            ->assertJsonPath('data.attributes.name', 'BlackRock')
+            ->assertJsonPath('data.type', 'fund-managers');
 
         $this->assertDatabaseHas('fund_managers', ['name' => 'BlackRock']);
     }
@@ -45,7 +46,7 @@ class FundManagerApiTest extends TestCase
         $response = $this->putJson("/api/fund-managers/{$manager->id}", ['name' => 'Updated Name']);
 
         $response->assertOk()
-            ->assertJsonPath('data.name', 'Updated Name');
+            ->assertJsonPath('data.attributes.name', 'Updated Name');
     }
 
     public function test_can_soft_delete_fund_manager_without_funds(): void

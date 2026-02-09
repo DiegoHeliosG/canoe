@@ -6,14 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreFundManagerRequest;
 use App\Http\Requests\UpdateFundManagerRequest;
 use App\Http\Resources\FundManagerResource;
+use App\Http\Resources\JsonApiCollection;
 use App\Models\FundManager;
 
 class FundManagerController extends Controller
 {
     public function index()
     {
-        return FundManagerResource::collection(
-            FundManager::withCount('funds')->paginate(15)
+        return new JsonApiCollection(
+            FundManager::withCount('funds')->paginate(15),
+            FundManagerResource::class,
         );
     }
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreFundRequest;
 use App\Http\Requests\UpdateFundRequest;
 use App\Http\Resources\FundResource;
+use App\Http\Resources\JsonApiCollection;
 use App\Models\Fund;
 use App\Services\FundService;
 use Illuminate\Http\Request;
@@ -38,7 +39,7 @@ class FundController extends Controller
             });
         }
 
-        return FundResource::collection($query->paginate(15));
+        return new JsonApiCollection($query->paginate(15), FundResource::class);
     }
 
     public function store(StoreFundRequest $request)

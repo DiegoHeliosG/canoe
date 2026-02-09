@@ -62,6 +62,7 @@
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../api';
+import { parseCollection } from '../jsonapi';
 
 const router = useRouter();
 const managers = ref([]);
@@ -104,7 +105,7 @@ onMounted(async () => {
         api.get('/fund-managers', { params: { per_page: 100 } }),
         api.get('/companies', { params: { per_page: 100 } }),
     ]);
-    managers.value = managersRes.data.data;
-    companies.value = companiesRes.data.data;
+    managers.value = parseCollection(managersRes.data).items;
+    companies.value = parseCollection(companiesRes.data).items;
 });
 </script>

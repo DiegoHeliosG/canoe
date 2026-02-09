@@ -23,9 +23,10 @@ class FundApiTest extends TestCase
         $response->assertOk()
             ->assertJsonCount(3, 'data')
             ->assertJsonStructure([
-                'data' => [['id', 'name', 'start_year', 'manager', 'aliases', 'companies']],
-                'meta' => ['current_page', 'last_page'],
-            ]);
+                'data' => [['type', 'id', 'attributes' => ['name', 'start_year'], 'relationships']],
+                'meta' => ['current_page', 'last_page', 'per_page', 'total'],
+            ])
+            ->assertJsonPath('data.0.type', 'funds');
     }
 
     public function test_can_filter_funds_by_name(): void
@@ -38,7 +39,7 @@ class FundApiTest extends TestCase
 
         $response->assertOk()
             ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.name', 'Alpha Growth Fund');
+            ->assertJsonPath('data.0.attributes.name', 'Alpha Growth Fund');
     }
 
     public function test_can_filter_funds_by_manager(): void
@@ -91,9 +92,9 @@ class FundApiTest extends TestCase
         ]);
 
         $response->assertCreated()
-            ->assertJsonPath('data.name', 'New Growth Fund')
-            ->assertJsonCount(2, 'data.aliases')
-            ->assertJsonCount(2, 'data.companies');
+            ->assertJsonPath('data.attributes.name', 'New Growth Fund')
+            ->assertJsonCount(2, 'data.relationships.aliases.data')
+            ->assertJsonCount(2, 'data.relationships.companies.data');
 
         $this->assertDatabaseHas('funds', ['name' => 'New Growth Fund']);
         $this->assertDatabaseHas('fund_aliases', ['name' => 'NGF']);
@@ -132,8 +133,9 @@ class FundApiTest extends TestCase
         $response = $this->getJson("/api/funds/{$fund->id}");
 
         $response->assertOk()
-            ->assertJsonPath('data.id', $fund->id)
-            ->assertJsonPath('data.name', $fund->name);
+            ->assertJsonPath('data.id', (string) $fund->id)
+            ->assertJsonPath('data.attributes.name', $fund->name)
+            ->assertJsonPath('data.type', 'funds');
     }
 
     public function test_can_update_fund(): void
@@ -148,7 +150,7 @@ class FundApiTest extends TestCase
         ]);
 
         $response->assertOk()
-            ->assertJsonPath('data.name', 'Updated Name');
+            ->assertJsonPath('data.attributes.name', 'Updated Name');
 
         $this->assertDatabaseHas('fund_aliases', ['name' => 'New Alias', 'fund_id' => $fund->id]);
     }

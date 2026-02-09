@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\DuplicateFundWarningResource;
+use App\Http\Resources\JsonApiCollection;
 use App\Models\DuplicateFundWarning;
 
 class DuplicateFundWarningController extends Controller
@@ -15,7 +16,7 @@ class DuplicateFundWarningController extends Controller
             ->latest()
             ->paginate(15);
 
-        return DuplicateFundWarningResource::collection($warnings);
+        return new JsonApiCollection($warnings, DuplicateFundWarningResource::class);
     }
 
     public function resolve(DuplicateFundWarning $duplicateFundWarning)

@@ -3,22 +3,63 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 
-class FundResource extends JsonResource
+class FundResource extends JsonApiResource
 {
-    public function toArray(Request $request): array
+    protected function resourceType(): string
+    {
+        return 'funds';
+    }
+
+    protected function resourceAttributes(Request $request): array
     {
         return [
-            'id' => $this->id,
             'name' => $this->name,
             'start_year' => $this->start_year,
-            'fund_manager_id' => $this->fund_manager_id,
-            'manager' => new FundManagerResource($this->whenLoaded('manager')),
-            'aliases' => FundAliasResource::collection($this->whenLoaded('aliases')),
-            'companies' => CompanyResource::collection($this->whenLoaded('companies')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
+    }
+
+    protected function resourceRelationships(Request $request): array
+    {
+        $relationships = [];
+
+        if ($this->relationLoaded('manager') && $this->manager) {
+            $relationships['manager'] = $this->relationshipLinkage('fund-managers', new FundManagerResource($this->manager));
+        }
+
+        if ($this->relationLoaded('aliases')) {
+            $relationships['aliases'] = $this->relationshipLinkageCollection('fund-aliases', $this->aliases);
+        }
+
+        if ($this->relationLoaded('companies')) {
+            $relationships['companies'] = $this->relationshipLinkageCollection('companies', $this->companies);
+        }
+
+        return $relationships;
+    }
+
+    public function resourceIncluded(Request $request): array
+    {
+        $included = [];
+
+        if ($this->relationLoaded('manager') && $this->manager) {
+            $included[] = (new FundManagerResource($this->manager))->toArray($request);
+        }
+
+        if ($this->relationLoaded('aliases')) {
+            foreach ($this->aliases as $alias) {
+                $included[] = (new FundAliasResource($alias))->toArray($request);
+            }
+        }
+
+        if ($this->relationLoaded('companies')) {
+            foreach ($this->companies as $company) {
+                $included[] = (new CompanyResource($company))->toArray($request);
+            }
+        }
+
+        return $included;
     }
 }

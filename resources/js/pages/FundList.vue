@@ -114,6 +114,7 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import api from '../api';
+import { parseCollection } from '../jsonapi';
 
 const funds = ref([]);
 const managers = ref([]);
@@ -135,9 +136,10 @@ async function fetchFunds(page = 1) {
     if (filters.company_id) params.company_id = filters.company_id;
 
     const { data } = await api.get('/funds', { params });
-    funds.value = data.data;
-    pagination.current_page = data.meta.current_page;
-    pagination.last_page = data.meta.last_page;
+    const result = parseCollection(data);
+    funds.value = result.items;
+    pagination.current_page = result.meta.current_page;
+    pagination.last_page = result.meta.last_page;
 }
 
 function goToPage(page) {
@@ -161,8 +163,8 @@ onMounted(async () => {
         api.get('/fund-managers', { params: { per_page: 100 } }),
         api.get('/companies', { params: { per_page: 100 } }),
     ]);
-    managers.value = managersRes.data.data;
-    companies.value = companiesRes.data.data;
+    managers.value = parseCollection(managersRes.data).items;
+    companies.value = parseCollection(companiesRes.data).items;
 });
 
 onUnmounted(() => {

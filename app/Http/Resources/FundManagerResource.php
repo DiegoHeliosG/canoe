@@ -3,14 +3,17 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 
-class FundManagerResource extends JsonResource
+class FundManagerResource extends JsonApiResource
 {
-    public function toArray(Request $request): array
+    protected function resourceType(): string
+    {
+        return 'fund-managers';
+    }
+
+    protected function resourceAttributes(Request $request): array
     {
         return [
-            'id' => $this->id,
             'name' => $this->name,
             'funds_count' => $this->whenCounted('funds'),
             'created_at' => $this->created_at,

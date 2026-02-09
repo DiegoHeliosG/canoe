@@ -3,14 +3,17 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 
-class CompanyResource extends JsonResource
+class CompanyResource extends JsonApiResource
 {
-    public function toArray(Request $request): array
+    protected function resourceType(): string
+    {
+        return 'companies';
+    }
+
+    protected function resourceAttributes(Request $request): array
     {
         return [
-            'id' => $this->id,
             'name' => $this->name,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

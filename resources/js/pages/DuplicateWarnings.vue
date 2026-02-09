@@ -44,12 +44,13 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import api from '../api';
+import { parseCollection } from '../jsonapi';
 
 const warnings = ref([]);
 
 async function fetchWarnings() {
     const { data } = await api.get('/duplicate-warnings');
-    warnings.value = data.data;
+    warnings.value = parseCollection(data).items;
 }
 
 async function resolve(warning) {

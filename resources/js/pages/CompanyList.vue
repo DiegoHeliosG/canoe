@@ -54,6 +54,7 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import api from '../api';
+import { parseCollection } from '../jsonapi';
 
 const companies = ref([]);
 const editing = ref(null);
@@ -62,7 +63,7 @@ const form = reactive({ name: '' });
 
 async function fetchCompanies() {
     const { data } = await api.get('/companies');
-    companies.value = data.data;
+    companies.value = parseCollection(data).items;
 }
 
 function editCompany(company) {

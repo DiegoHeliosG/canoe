@@ -64,6 +64,7 @@
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '../api';
+import { parseCollection, parseSingle } from '../jsonapi';
 
 const route = useRoute();
 const router = useRouter();
@@ -110,15 +111,15 @@ onMounted(async () => {
         api.get('/companies', { params: { per_page: 100 } }),
     ]);
 
-    const fund = fundRes.data.data;
+    const fund = parseSingle(fundRes.data);
     form.name = fund.name;
     form.start_year = fund.start_year;
-    form.fund_manager_id = fund.fund_manager_id;
-    form.aliases = fund.aliases.map(a => a.name);
-    form.company_ids = fund.companies.map(c => c.id);
+    form.fund_manager_id = fund.manager?.id || '';
+    form.aliases = (fund.aliases || []).map(a => a.name);
+    form.company_ids = (fund.companies || []).map(c => c.id);
 
-    managers.value = managersRes.data.data;
-    companies.value = companiesRes.data.data;
+    managers.value = parseCollection(managersRes.data).items;
+    companies.value = parseCollection(companiesRes.data).items;
     loading.value = false;
 });
 </script>

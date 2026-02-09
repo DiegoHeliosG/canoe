@@ -24,7 +24,8 @@ class CompanyApiTest extends TestCase
         $response = $this->postJson('/api/companies', ['name' => 'Canoe Intelligence']);
 
         $response->assertCreated()
-            ->assertJsonPath('data.name', 'Canoe Intelligence');
+            ->assertJsonPath('data.attributes.name', 'Canoe Intelligence')
+            ->assertJsonPath('data.type', 'companies');
 
         $this->assertDatabaseHas('companies', ['name' => 'Canoe Intelligence']);
     }
@@ -44,7 +45,7 @@ class CompanyApiTest extends TestCase
         $response = $this->putJson("/api/companies/{$company->id}", ['name' => 'Updated Inc.']);
 
         $response->assertOk()
-            ->assertJsonPath('data.name', 'Updated Inc.');
+            ->assertJsonPath('data.attributes.name', 'Updated Inc.');
     }
 
     public function test_can_soft_delete_company(): void

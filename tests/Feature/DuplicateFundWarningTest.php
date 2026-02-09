@@ -124,7 +124,7 @@ class DuplicateFundWarningTest extends TestCase
         $response = $this->patchJson("/api/duplicate-warnings/{$warning->id}/resolve");
 
         $response->assertOk()
-            ->assertJsonPath('data.is_resolved', true);
+            ->assertJsonPath('data.attributes.is_resolved', true);
 
         // Resolved warnings should not appear in list
         $listResponse = $this->getJson('/api/duplicate-warnings');
