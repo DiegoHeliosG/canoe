@@ -31,6 +31,9 @@ docker compose exec php npm install
 echo "==> Building frontend assets..."
 docker compose exec php npm run build
 
+echo "==> Generating API documentation..."
+docker compose exec php php artisan l5-swagger:generate
+
 echo "==> Running tests..."
 docker compose exec php php artisan test
 
@@ -39,4 +42,5 @@ docker compose exec -d php php artisan queue:work
 
 echo ""
 echo "==> Done! Application is available at http://localhost:8080"
+echo "    API Documentation: http://localhost:8080/api/documentation"
 echo "    RabbitMQ Management UI: http://localhost:15672 (silitech/silitech)"
