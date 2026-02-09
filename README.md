@@ -19,6 +19,8 @@ A fund management application built with Laravel 12 and Vue 3 that supports CRUD
 
 ## Getting Started
 
+**Prerequisites:** Docker and Docker Compose.
+
 ```bash
 ./init.sh
 ```

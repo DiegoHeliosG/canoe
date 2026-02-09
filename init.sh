@@ -16,6 +16,10 @@ echo "==> Setting up environment..."
 docker compose exec php cp -n .env.example .env || true
 docker compose exec php php artisan key:generate --no-interaction --force
 
+echo "==> Fixing storage and cache permissions..."
+docker compose exec php chmod -R 775 storage bootstrap/cache
+docker compose exec php chown -R www-data:www-data storage bootstrap/cache
+
 echo "==> Clearing caches..."
 docker compose exec php php artisan config:clear --no-interaction
 docker compose exec php php artisan route:clear --no-interaction
