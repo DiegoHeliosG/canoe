@@ -23,11 +23,11 @@ A fund management application built with Laravel 12 and Vue 3 that supports CRUD
 ./init.sh
 ```
 
-This script handles everything: Docker services, dependencies, migrations, seeding, frontend build, tests, and starts the queue worker.
+This script handles everything: Docker services, dependencies, migrations, seeding, frontend build, API documentation generation, tests, and starts the queue worker.
 
 The application is available at **http://localhost:8080**.
 
-## Credentials
+## Credentials (Local Development Only)
 
 ### MySQL
 
@@ -92,46 +92,11 @@ Tests use SQLite in-memory with `QUEUE_CONNECTION=sync` so no external services 
 └──────────────────────────────────────┘
 ```
 
-## API Reference
+## API Documentation
 
-All endpoints are prefixed with `/api`.
+Interactive API documentation is available via Swagger UI at **http://localhost:8080/api/documentation** (non-production environments only).
 
-### Funds
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/funds` | List funds (paginated). Filters: `name`, `fund_manager_id`, `year`, `company_id` |
-| POST | `/funds` | Create a fund with `name`, `start_year`, `fund_manager_id`, optional `aliases[]` and `company_ids[]` |
-| GET | `/funds/{id}` | Show a single fund with manager, aliases, and companies |
-| PUT | `/funds/{id}` | Update a fund and its aliases/companies |
-| DELETE | `/funds/{id}` | Soft delete a fund |
-
-### Fund Managers
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/fund-managers` | List fund managers with fund counts |
-| POST | `/fund-managers` | Create a fund manager |
-| GET | `/fund-managers/{id}` | Show a fund manager |
-| PUT | `/fund-managers/{id}` | Update a fund manager |
-| DELETE | `/fund-managers/{id}` | Soft delete (returns 409 if manager has funds) |
-
-### Companies
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/companies` | List companies (paginated) |
-| POST | `/companies` | Create a company |
-| GET | `/companies/{id}` | Show a company |
-| PUT | `/companies/{id}` | Update a company |
-| DELETE | `/companies/{id}` | Soft delete a company |
-
-### Duplicate Warnings
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/duplicate-warnings` | List unresolved duplicate fund warnings |
-| PATCH | `/duplicate-warnings/{id}/resolve` | Mark a warning as resolved |
+All API responses follow the [JSON:API](https://jsonapi.org/) specification, with resources wrapped in `{ "data": { "type", "id", "attributes", "relationships" } }` envelopes and related resources included via the `included` top-level member.
 
 ## Architecture
 
@@ -151,8 +116,9 @@ All endpoints are prefixed with `/api`.
 
 ### Tradeoffs & Areas for Improvement
 
-- **Duplicate detection** currently scans all same-manager funds. At scale, a database-level case-insensitive index or search engine would improve matching performance.
-- **Alias uniqueness** validation checks both `fund_aliases` and `funds` tables. This could be consolidated into a single constraint.
+- **Async duplicate detection is overkill for simple matching:** The current case-insensitive name/alias comparison is fast enough to run synchronously. The async queue architecture becomes valuable when duplicate detection evolves to use AI-powered validation (NLP, fuzzy matching, machine learning), where processing time would be unpredictable and better handled outside the request lifecycle.
+- **Dedicated worker container:** A separate app container should be added for the queue worker instead of running it in the same container as PHP-FPM, allowing independent scaling and preventing worker crashes from affecting the web server.
+- **Fund name search:** The `LIKE '%...%'` filter on fund names cannot leverage a standard B-tree index. A full-text index on `funds.name` would improve search performance at scale.
 - **Authentication/Authorization** is not implemented. In production, API endpoints would be protected by middleware and policies.
 - **Pagination** is fixed at 15 items per page. This could be made configurable via query parameters.
 - **Database transactions** wrap fund creation and updates to ensure atomic operations with aliases and company associations.
