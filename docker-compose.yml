@@ -12,9 +12,7 @@ services:
       - silitech
 
   php:
-    build:
-      context: .
-      dockerfile: docker/php/Dockerfile
+    image: diegoheliosg/canoe-php:latest
     volumes:
       - .:/var/www/html
     depends_on:

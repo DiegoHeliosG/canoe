@@ -2,7 +2,7 @@
 set -e
 
 echo "==> Starting Docker services..."
-docker compose up -d --build
+docker compose up -d
 
 echo "==> Waiting for MySQL to be ready..."
 until docker compose exec php php -r "new PDO('mysql:host=mysql;dbname=silitech', 'root', 'root');" >/dev/null 2>&1; do
